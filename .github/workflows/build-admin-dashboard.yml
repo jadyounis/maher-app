@@ -1,0 +1,33 @@
+name: Build MAHER Admin Dashboard
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+env:
+  MAHER_SUPABASE_URL: https://oqvcmzqhngzpqipgynby.supabase.co
+
+jobs:
+  dashboard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Prepare runtime config
+        run: |
+          cat > admin_dashboard/config.js <<'EOF'
+          window.MAHER_CONFIG = {
+            url: '${{ env.MAHER_SUPABASE_URL }}',
+            key: '${{ secrets.MAHER_SUPABASE_PUBLISHABLE_KEY }}'
+          };
+          EOF
+      - name: Validate dashboard files
+        run: |
+          test -f admin_dashboard/index.html
+          test -f admin_dashboard/config.js
+      - name: Upload dashboard
+        uses: actions/upload-artifact@v4
+        with:
+          name: MAHER-Admin-Dashboard
+          path: admin_dashboard/
