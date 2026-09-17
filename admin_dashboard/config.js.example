@@ -1,0 +1,4 @@
+window.MAHER_CONFIG = {
+  url: 'https://oqvcmzqhngzpqipgynby.supabase.co',
+  key: 'REPLACE_AT_BUILD_TIME'
+};
