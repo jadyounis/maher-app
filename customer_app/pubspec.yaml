@@ -1,7 +1,7 @@
 name: maher_customer
 description: MAHER customer app
 publish_to: "none"
-version: 0.2.0+2
+version: 0.3.0+3
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  supabase_flutter: ^2.9.1
 
 dev_dependencies:
   flutter_test:
