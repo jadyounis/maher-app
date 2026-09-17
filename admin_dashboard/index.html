@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MAHER Admin Dashboard</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f8fafc;color:#111827}header{background:#111827;color:white;padding:22px 28px;display:flex;justify-content:space-between;align-items:center}main{max-width:1400px;margin:auto;padding:24px}.brand{font-weight:900;font-size:24px}.muted{color:#64748b}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:white;border:1px solid #e5e7eb;border-radius:18px;padding:18px;box-shadow:0 5px 20px #1118270a}.metric b{font-size:28px;display:block;margin-top:8px}.section{margin-top:24px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}input,select,button{font:inherit;border:1px solid #d1d5db;border-radius:10px;padding:10px 12px;background:white}button{cursor:pointer}button.primary{background:#f97316;color:white;border-color:#f97316}table{width:100%;border-collapse:collapse;background:white;border-radius:16px;overflow:hidden}th,td{padding:13px;border-bottom:1px solid #eef2f7;text-align:right}th{background:#f8fafc}.badge{display:inline-block;padding:5px 9px;border-radius:999px;font-size:12px;background:#eef2ff}.danger{background:#fee2e2}.warn{background:#fef3c7}.ok{background:#dcfce7}.split{display:grid;grid-template-columns:2fr 1fr;gap:16px}.action{display:flex;gap:7px;flex-wrap:wrap}.footer{padding:30px 0;color:#64748b}@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}}@media(max-width:600px){.grid{grid-template-columns:1fr}.card{padding:14px}}
+</style>
+</head>
+<body>
+<header><div><div class="brand">MAHER ADMIN</div><div class="muted" style="color:#cbd5e1">مركز التحكم الكامل</div></div><div>30% عمولة المنصة</div></header>
+<main>
+<section class="grid">
+<div class="card metric"><span class="muted">الطلبات اليوم</span><b>148</b></div>
+<div class="card metric"><span class="muted">طلبات مكتملة</span><b>96</b></div>
+<div class="card metric"><span class="muted">إيراد MAHER</span><b>1,284 د.أ</b></div>
+<div class="card metric"><span class="muted">بلاغات مفتوحة</span><b id="reportsCount">7</b></div>
+</section>
+
+<section class="section split">
+<div class="card">
+<h2>آخر الطلبات</h2>
+<div class="toolbar"><input id="search" placeholder="ابحث عن طلب أو عميل أو صنايعي..." oninput="filterRows()"><select id="status" onchange="filterRows()"><option value="">كل الحالات</option><option>قيد التنفيذ</option><option>بانتظار العروض</option><option>مكتمل</option><option>ملغي</option></select></div>
+<table><thead><tr><th>الطلب</th><th>العميل</th><th>الصنايعي</th><th>القيمة</th><th>الحالة</th></tr></thead><tbody id="orders"><tr><td>تركيب بسكليت</td><td>سيف</td><td>محمد</td><td>10 د.أ/ساعة</td><td><span class="badge ok">قيد التنفيذ</span></td></tr><tr><td>تصليح تسريب</td><td>ليان</td><td>أحمد</td><td>25 د.أ</td><td><span class="badge">بانتظار العروض</span></td></tr><tr><td>دهان غرفة</td><td>عمر</td><td>يزن</td><td>50 د.أ/يومي</td><td><span class="badge ok">مكتمل</span></td></tr><tr><td>صيانة مكيف</td><td>نور</td><td>—</td><td>—</td><td><span class="badge danger">ملغي</span></td></tr></tbody></table>
+</div>
+<div class="card">
+<h2>إعدادات العمولة</h2><p class="muted">النسبة المستخدمة في الحسابات المالية.</p><label>Commission %</label><input id="commission" type="number" value="30" min="0" max="100" style="width:100%;margin:8px 0 14px"><button class="primary" onclick="saveCommission()">حفظ النسبة</button><p id="saved" class="muted"></p>
+<hr style="border:none;border-top:1px solid #eef2f7;margin:20px 0">
+<h3>حاسبة مثال</h3><input id="gross" type="number" value="10" style="width:100%"><p>عمولة MAHER: <b id="fee">3.00 د.أ</b></p><p>مستحق الصنايعي: <b id="net">7.00 د.أ</b></p>
+</div>
+</section>
+
+<section class="section card">
+<h2>البلاغات والمخالفات</h2>
+<table><thead><tr><th>المستخدم</th><th>النوع</th><th>البلاغات</th><th>آخر ملاحظة</th><th>إجراء الإدارة</th></tr></thead><tbody>
+<tr><td>محمد العجارمة</td><td><span class="badge warn">صنايعي</span></td><td>3</td><td>تأخر عن موعد العمل</td><td><div class="action"><button onclick="moderate('تنبيه')">تنبيه</button><button onclick="moderate('تحذير')">تحذير</button><button onclick="moderate('خصم')">خصم</button><button onclick="moderate('حظر مؤقت')">حظر مؤقت</button><button onclick="moderate('حظر نهائي')">حظر نهائي</button></div></td></tr>
+<tr><td>حساب عميل تجريبي</td><td><span class="badge">عميل</span></td><td>1</td><td>بلاغ قيد المراجعة</td><td><div class="action"><button onclick="moderate('طلب توضيح')">طلب توضيح</button><button onclick="moderate('إغلاق البلاغ')">إغلاق البلاغ</button></div></td></tr>
+</tbody></table>
+</section>
+
+<section class="section grid">
+<div class="card"><h3>الصنايعية</h3><p>1,284 حساب</p><button>إدارة الصنايعية</button></div>
+<div class="card"><h3>العملاء</h3><p>8,921 حساب</p><button>إدارة العملاء</button></div>
+<div class="card"><h3>التقييمات</h3><p>4.78 متوسط</p><button>مراجعة التقييمات</button></div>
+<div class="card"><h3>الخدمات</h3><p>12 فئة</p><button>إدارة الفئات</button></div>
+</section>
+<div class="footer">MAHER Admin — هذه الواجهة جاهزة للربط مع قاعدة البيانات وصلاحيات الإدارة بعد تفعيل Backend.</div>
+</main>
+<script>
+let rate=30;
+function calc(){const g=Number(document.getElementById('gross').value||0),r=Number(document.getElementById('commission').value||0);document.getElementById('fee').textContent=(g*r/100).toFixed(2)+' د.أ';document.getElementById('net').textContent=(g-g*r/100).toFixed(2)+' د.أ'}
+document.getElementById('gross').addEventListener('input',calc);document.getElementById('commission').addEventListener('input',calc);
+function saveCommission(){rate=Number(document.getElementById('commission').value||0);document.getElementById('saved').textContent='تم حفظ النسبة: '+rate+'% (ديمو)';calc()}
+function moderate(action){alert('إجراء إداري: '+action+'\nسيتم تسجيله في Audit Log عند ربط الـBackend.')}
+function filterRows(){const q=document.getElementById('search').value.toLowerCase(),s=document.getElementById('status').value;document.querySelectorAll('#orders tr').forEach(tr=>{const text=tr.innerText.toLowerCase();tr.style.display=(!q||text.includes(q))&&(!s||text.includes(s))?'':'none'})}
+calc();
+</script>
+</body></html>
