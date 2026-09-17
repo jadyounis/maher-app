@@ -2,57 +2,62 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MAHER Admin Dashboard</title>
+<title>MAHER Admin</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f8fafc;color:#111827}header{background:#111827;color:white;padding:22px 28px;display:flex;justify-content:space-between;align-items:center}main{max-width:1400px;margin:auto;padding:24px}.brand{font-weight:900;font-size:24px}.muted{color:#64748b}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:white;border:1px solid #e5e7eb;border-radius:18px;padding:18px;box-shadow:0 5px 20px #1118270a}.metric b{font-size:28px;display:block;margin-top:8px}.section{margin-top:24px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}input,select,button{font:inherit;border:1px solid #d1d5db;border-radius:10px;padding:10px 12px;background:white}button{cursor:pointer}button.primary{background:#f97316;color:white;border-color:#f97316}table{width:100%;border-collapse:collapse;background:white;border-radius:16px;overflow:hidden}th,td{padding:13px;border-bottom:1px solid #eef2f7;text-align:right}th{background:#f8fafc}.badge{display:inline-block;padding:5px 9px;border-radius:999px;font-size:12px;background:#eef2ff}.danger{background:#fee2e2}.warn{background:#fef3c7}.ok{background:#dcfce7}.split{display:grid;grid-template-columns:2fr 1fr;gap:16px}.action{display:flex;gap:7px;flex-wrap:wrap}.footer{padding:30px 0;color:#64748b}@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}}@media(max-width:600px){.grid{grid-template-columns:1fr}.card{padding:14px}}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f8fafc;color:#111827}header{background:#111827;color:#fff;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;gap:16px}.brand{font-size:24px;font-weight:900}main{max-width:1450px;margin:auto;padding:24px}.card{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:18px;box-shadow:0 5px 20px #11182710}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.metric b{display:block;font-size:28px;margin-top:8px}.section{margin-top:20px}.split{display:grid;grid-template-columns:2fr 1fr;gap:16px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}input,select,button,textarea{font:inherit;border:1px solid #d1d5db;border-radius:10px;padding:10px 12px;background:#fff}button{cursor:pointer}.primary{background:#f97316;color:#fff;border-color:#f97316}.danger{background:#dc2626;color:#fff;border-color:#dc2626}.muted{color:#64748b}.badge{display:inline-block;padding:5px 9px;border-radius:999px;background:#eef2ff;font-size:12px}.ok{background:#dcfce7}.warn{background:#fef3c7}.bad{background:#fee2e2}table{width:100%;border-collapse:collapse}th,td{padding:11px;border-bottom:1px solid #eef2f7;text-align:right;vertical-align:top}.login{max-width:420px;margin:10vh auto}.hidden{display:none}.action{display:flex;gap:6px;flex-wrap:wrap}.notice{margin:12px 0;padding:10px 12px;border-radius:10px;background:#fff7ed}.footer{padding:28px 0;color:#64748b}@media(max-width:950px){.grid{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}}@media(max-width:600px){.grid{grid-template-columns:1fr}main{padding:14px}header{padding:16px}}
 </style>
 </head>
 <body>
-<header><div><div class="brand">MAHER ADMIN</div><div class="muted" style="color:#cbd5e1">مركز التحكم الكامل</div></div><div>30% عمولة المنصة</div></header>
+<div id="login" class="login card">
+  <div class="brand">MAHER ADMIN</div><p class="muted">دخول آمن لمركز التحكم</p>
+  <input id="email" type="email" placeholder="البريد الإلكتروني" style="width:100%;margin:6px 0">
+  <input id="password" type="password" placeholder="كلمة المرور" style="width:100%;margin:6px 0">
+  <button class="primary" style="width:100%;margin-top:8px" onclick="login()">دخول</button>
+  <p id="loginMsg" class="muted"></p>
+</div>
+<div id="app" class="hidden">
+<header><div><div class="brand">MAHER ADMIN</div><div style="color:#cbd5e1">مركز التحكم الكامل</div></div><div class="action"><span id="adminName"></span><button onclick="logout()">تسجيل خروج</button></div></header>
 <main>
 <section class="grid">
-<div class="card metric"><span class="muted">الطلبات اليوم</span><b>148</b></div>
-<div class="card metric"><span class="muted">طلبات مكتملة</span><b>96</b></div>
-<div class="card metric"><span class="muted">إيراد MAHER</span><b>1,284 د.أ</b></div>
-<div class="card metric"><span class="muted">بلاغات مفتوحة</span><b id="reportsCount">7</b></div>
+<div class="card metric"><span class="muted">الطلبات اليوم</span><b id="todayCount">—</b></div>
+<div class="card metric"><span class="muted">الطلبات المكتملة</span><b id="completedCount">—</b></div>
+<div class="card metric"><span class="muted">إيراد المنصة</span><b id="revenue">—</b></div>
+<div class="card metric"><span class="muted">البلاغات المفتوحة</span><b id="reportsCount">—</b></div>
 </section>
-
 <section class="section split">
-<div class="card">
-<h2>آخر الطلبات</h2>
-<div class="toolbar"><input id="search" placeholder="ابحث عن طلب أو عميل أو صنايعي..." oninput="filterRows()"><select id="status" onchange="filterRows()"><option value="">كل الحالات</option><option>قيد التنفيذ</option><option>بانتظار العروض</option><option>مكتمل</option><option>ملغي</option></select></div>
-<table><thead><tr><th>الطلب</th><th>العميل</th><th>الصنايعي</th><th>القيمة</th><th>الحالة</th></tr></thead><tbody id="orders"><tr><td>تركيب بسكليت</td><td>سيف</td><td>محمد</td><td>10 د.أ/ساعة</td><td><span class="badge ok">قيد التنفيذ</span></td></tr><tr><td>تصليح تسريب</td><td>ليان</td><td>أحمد</td><td>25 د.أ</td><td><span class="badge">بانتظار العروض</span></td></tr><tr><td>دهان غرفة</td><td>عمر</td><td>يزن</td><td>50 د.أ/يومي</td><td><span class="badge ok">مكتمل</span></td></tr><tr><td>صيانة مكيف</td><td>نور</td><td>—</td><td>—</td><td><span class="badge danger">ملغي</span></td></tr></tbody></table>
-</div>
-<div class="card">
-<h2>إعدادات العمولة</h2><p class="muted">النسبة المستخدمة في الحسابات المالية.</p><label>Commission %</label><input id="commission" type="number" value="30" min="0" max="100" style="width:100%;margin:8px 0 14px"><button class="primary" onclick="saveCommission()">حفظ النسبة</button><p id="saved" class="muted"></p>
-<hr style="border:none;border-top:1px solid #eef2f7;margin:20px 0">
-<h3>حاسبة مثال</h3><input id="gross" type="number" value="10" style="width:100%"><p>عمولة MAHER: <b id="fee">3.00 د.أ</b></p><p>مستحق الصنايعي: <b id="net">7.00 د.أ</b></p>
-</div>
+<div class="card"><h2>آخر الطلبات</h2><div class="toolbar"><input id="search" placeholder="بحث..." oninput="renderOrders()"><select id="orderFilter" onchange="renderOrders()"><option value="">كل الحالات</option><option value="published">بانتظار العروض</option><option value="offers_received">وصلت عروض</option><option value="professional_selected">تم اختيار الصنايعي</option><option value="en_route">بالطريق</option><option value="arrived">وصل</option><option value="in_progress">قيد التنفيذ</option><option value="completed">مكتمل</option><option value="cancelled">ملغي</option></select></div><div style="overflow:auto"><table><thead><tr><th>الطلب</th><th>العميل</th><th>القيمة</th><th>الحالة</th></tr></thead><tbody id="orders"></tbody></table></div></div>
+<div class="card"><h2>الإعدادات</h2><label>عمولة المنصة %</label><input id="commission" type="number" min="0" max="100" step="0.1" style="width:100%;margin:8px 0"><button class="primary" onclick="saveCommission()">حفظ</button><p id="saveMsg" class="muted"></p><hr style="border:0;border-top:1px solid #eef2f7;margin:20px 0"><h3>حاسبة العمولة</h3><input id="gross" type="number" value="10" style="width:100%"><p>MAHER: <b id="fee">3.00 د.أ</b></p><p>الصنايعي: <b id="net">7.00 د.أ</b></p></div>
 </section>
-
-<section class="section card">
-<h2>البلاغات والمخالفات</h2>
-<table><thead><tr><th>المستخدم</th><th>النوع</th><th>البلاغات</th><th>آخر ملاحظة</th><th>إجراء الإدارة</th></tr></thead><tbody>
-<tr><td>محمد العجارمة</td><td><span class="badge warn">صنايعي</span></td><td>3</td><td>تأخر عن موعد العمل</td><td><div class="action"><button onclick="moderate('تنبيه')">تنبيه</button><button onclick="moderate('تحذير')">تحذير</button><button onclick="moderate('خصم')">خصم</button><button onclick="moderate('حظر مؤقت')">حظر مؤقت</button><button onclick="moderate('حظر نهائي')">حظر نهائي</button></div></td></tr>
-<tr><td>حساب عميل تجريبي</td><td><span class="badge">عميل</span></td><td>1</td><td>بلاغ قيد المراجعة</td><td><div class="action"><button onclick="moderate('طلب توضيح')">طلب توضيح</button><button onclick="moderate('إغلاق البلاغ')">إغلاق البلاغ</button></div></td></tr>
-</tbody></table>
-</section>
-
-<section class="section grid">
-<div class="card"><h3>الصنايعية</h3><p>1,284 حساب</p><button>إدارة الصنايعية</button></div>
-<div class="card"><h3>العملاء</h3><p>8,921 حساب</p><button>إدارة العملاء</button></div>
-<div class="card"><h3>التقييمات</h3><p>4.78 متوسط</p><button>مراجعة التقييمات</button></div>
-<div class="card"><h3>الخدمات</h3><p>12 فئة</p><button>إدارة الفئات</button></div>
-</section>
-<div class="footer">MAHER Admin — هذه الواجهة جاهزة للربط مع قاعدة البيانات وصلاحيات الإدارة بعد تفعيل Backend.</div>
-</main>
-<script>
-let rate=30;
-function calc(){const g=Number(document.getElementById('gross').value||0),r=Number(document.getElementById('commission').value||0);document.getElementById('fee').textContent=(g*r/100).toFixed(2)+' د.أ';document.getElementById('net').textContent=(g-g*r/100).toFixed(2)+' د.أ'}
-document.getElementById('gross').addEventListener('input',calc);document.getElementById('commission').addEventListener('input',calc);
-function saveCommission(){rate=Number(document.getElementById('commission').value||0);document.getElementById('saved').textContent='تم حفظ النسبة: '+rate+'% (ديمو)';calc()}
-function moderate(action){alert('إجراء إداري: '+action+'\nسيتم تسجيله في Audit Log عند ربط الـBackend.')}
-function filterRows(){const q=document.getElementById('search').value.toLowerCase(),s=document.getElementById('status').value;document.querySelectorAll('#orders tr').forEach(tr=>{const text=tr.innerText.toLowerCase();tr.style.display=(!q||text.includes(q))&&(!s||text.includes(s))?'':'none'})}
-calc();
+<section class="section card"><h2>البلاغات والمخالفات</h2><div style="overflow:auto"><table><thead><tr><th>المستخدم</th><th>السبب</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="reports"></tbody></table></div></section>
+<section class="section card"><h2>الصنايعية والتحقق</h2><div style="overflow:auto"><table><thead><tr><th>الاسم</th><th>التقييم</th><th>الطلبات</th><th>التحقق</th><th>الحساب</th><th>إجراء</th></tr></thead><tbody id="pros"></tbody></table></div></section>
+<div class="footer">MAHER Admin — البيانات والإجراءات تُحفظ مباشرة في Supabase مع صلاحيات الإدارة.</div>
+</main></div>
+<script src="./config.js"></script>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const cfg=window.MAHER_CONFIG||{}; const sb=cfg.url&&cfg.key?createClient(cfg.url,cfg.key):null;
+let orders=[], reports=[];
+const statusAr={published:'بانتظار العروض',offers_received:'وصلت عروض',professional_selected:'تم اختيار الصنايعي',scheduled:'مجدول',en_route:'بالطريق',arrived:'وصل',in_progress:'قيد التنفيذ',completed:'مكتمل',paid:'مدفوع',reviewed:'تم التقييم',cancelled:'ملغي'};
+const modeAr={hourly:'بالساعة',daily:'يومي',contract:'مقاولة'};
+function esc(s){return String(s??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\\':'&#92;','"':'&quot;'}[c]));}
+function msg(t){document.getElementById('loginMsg').textContent=t}
+async function login(){if(!sb)return msg('إعدادات Supabase غير متوفرة.'); const email=document.getElementById('email').value.trim(),password=document.getElementById('password').value; const {error}=await sb.auth.signInWithPassword({email,password}); if(error)return msg(error.message); await boot();}
+async function boot(){const {data:{user}}=await sb.auth.getUser(); if(!user)return; const {data:p,error}=await sb.from('profiles').select('full_name,role,is_active').eq('id',user.id).single(); if(error||!p||p.role!=='admin'||!p.is_active){await sb.auth.signOut();return msg('هذا الحساب ليس حساب إدارة فعالاً.');} document.getElementById('adminName').textContent=p.full_name||user.email||''; document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden'); await loadData();}
+async function loadData(){const today=new Date();today.setHours(0,0,0,0);const [a,b,c,d,e,f]=await Promise.all([sb.from('requests').select('id',{count:'exact',head:true}).gte('created_at',today.toISOString()),sb.from('requests').select('id',{count:'exact',head:true}).in('status',['completed','paid','reviewed']),sb.from('transactions').select('commission_amount'),sb.from('reports').select('id',{count:'exact',head:true}).neq('status','resolved'),sb.from('requests').select('id,title,pricing_mode,status,customer_id,selected_professional_id,created_at').order('created_at',{ascending:false}).limit(30),sb.from('reports').select('id,reported_user_id,reporter_id,reason,details,status,created_at').order('created_at',{ascending:false}).limit(30)]); document.getElementById('todayCount').textContent=a.count??0;document.getElementById('completedCount').textContent=b.count??0;document.getElementById('revenue').textContent=((c.data||[]).reduce((n,r)=>n+Number(r.commission_amount||0),0)).toFixed(2)+' د.أ';document.getElementById('reportsCount').textContent=d.count??0;orders=f.data||[];reports=g.data||[];renderOrders();renderReports();loadPros();loadCommission();}
+function renderOrders(){const q=document.getElementById('search').value.toLowerCase(),filter=document.getElementById('orderFilter').value;document.getElementById('orders').innerHTML=orders.filter(r=>(!filter||r.status===filter)&&(!q||String(r.title).toLowerCase().includes(q))).map(r=>`<tr><td><b>${esc(r.title)}</b><br><span class="muted">${modeAr[r.pricing_mode]||r.pricing_mode}</span></td><td>${esc(r.customer_id).slice(0,8)}…</td><td>—</td><td><span class="badge">${statusAr[r.status]||esc(r.status)}</span></td></tr>`).join('')||'<tr><td colspan="4">لا توجد نتائج.</td></tr>';}
+async function nameMap(ids){if(!ids.length)return{};const {data}=await sb.from('profiles').select('id,full_name').in('id',ids);return Object.fromEntries((data||[]).map(x=>[x.id,x.full_name||x.id.slice(0,8)]));}
+async function renderReports(){const ids=[...new Set(reports.map(r=>r.reported_user_id))];const names=await nameMap(ids);document.getElementById('reports').innerHTML=reports.map(r=>`<tr><td>${esc(names[r.reported_user_id]||r.reported_user_id.slice(0,8))}</td><td>${esc(r.reason)}<br><span class="muted">${esc(r.details||'')}</span></td><td><span class="badge ${r.status==='resolved'?'ok':'warn'}">${esc(r.status)}</span></td><td class="action"><button onclick="resolveReport('${r.id}')">إغلاق البلاغ</button><button onclick="moderate('${r.reported_user_id}','warning')">تحذير</button><button onclick="moderate('${r.reported_user_id}','temporary_ban')">حظر مؤقت</button><button class="danger" onclick="moderate('${r.reported_user_id}','permanent_ban')">حظر نهائي</button></td></tr>`).join('')||'<tr><td colspan="4">لا توجد بلاغات.</td></tr>';}
+async function resolveReport(id){const reason=prompt('اكتب قرار الإغلاق:','تمت المراجعة');if(reason===null)return;const {error}=await sb.rpc('admin_resolve_report',{p_report_id:id,p_resolution:reason});if(error)alert(error.message);await loadData();}
+async function moderate(userId,type){const reason=prompt('سبب الإجراء:');if(reason===null)return;let amount=null;if(type==='penalty'){amount=Number(prompt('قيمة الخصم بالدينار:','0'));} if(type==='temporary_ban'){const days=Number(prompt('مدة الحظر بالأيام:','7'));if(!Number.isFinite(days)||days<=0)return;const expires=new Date(Date.now()+days*86400000).toISOString();const {error}=await sb.from('moderation_actions').insert({target_user_id:userId,admin_id:(await sb.auth.getUser()).data.user.id,action_type:type,reason,expires_at:expires});if(error)alert(error.message);else await sb.rpc('admin_set_user_status',{p_user_id:userId,p_is_active:false});}else{const payload={target_user_id:userId,admin_id:(await sb.auth.getUser()).data.user.id,action_type:type,reason,amount};const {error}=await sb.from('moderation_actions').insert(payload);if(error)alert(error.message);if(type==='permanent_ban')await sb.rpc('admin_set_user_status',{p_user_id:userId,p_is_active:false});}await loadData();}
+async function loadPros(){const {data}=await sb.from('profiles').select('id,full_name,is_active,role').eq('role','professional').order('created_at',{ascending:false}).limit(50);const ids=(data||[]).map(x=>x.id);const {data:pp}=ids.length?await sb.from('professional_profiles').select('user_id,rating,completed_jobs,verification_status').in('user_id',ids):{data:[]};const map=Object.fromEntries((pp||[]).map(x=>[x.user_id,x]));document.getElementById('pros').innerHTML=(data||[]).map(p=>{const x=map[p.id]||{};return `<tr><td>${esc(p.full_name||p.id.slice(0,8))}</td><td>${Number(x.rating||0).toFixed(2)}</td><td>${x.completed_jobs||0}</td><td><span class="badge">${esc(x.verification_status||'pending')}</span></td><td>${p.is_active?'فعال':'موقوف'}</td><td class="action"><button onclick="verify('${p.id}','verified')">توثيق</button><button onclick="verify('${p.id}','rejected')">رفض</button><button onclick="setActive('${p.id}',${!p.is_active})">${p.is_active?'إيقاف':'تفعيل'}</button></td></tr>`}).join('')||'<tr><td colspan="6">لا يوجد صنايعية.</td></tr>';}
+async function verify(id,status){const {error}=await sb.rpc('admin_set_professional_verification',{p_user_id:id,p_status:status});if(error)alert(error.message);await loadPros();}
+async function setActive(id,value){const {error}=await sb.rpc('admin_set_user_status',{p_user_id:id,p_is_active:value});if(error)alert(error.message);await loadPros();}
+async function loadCommission(){const {data}=await sb.from('platform_settings').select('value_numeric').eq('key','commission_rate_percent').maybeSingle();document.getElementById('commission').value=Number(data?.value_numeric??30);calc();}
+async function saveCommission(){const rate=Number(document.getElementById('commission').value);if(!Number.isFinite(rate)||rate<0||rate>100)return;const {error}=await sb.from('platform_settings').upsert({key:'commission_rate_percent',value_numeric:rate,updated_at:new Date().toISOString()});document.getElementById('saveMsg').textContent=error?error.message:'تم حفظ النسبة';calc();}
+function calc(){const g=Number(document.getElementById('gross').value||0),r=Number(document.getElementById('commission').value||0);document.getElementById('fee').textContent=(g*r/100).toFixed(2)+' د.أ';document.getElementById('net').textContent=(g-g*r/100).toFixed(2)+' د.أ';}document.getElementById('gross').addEventListener('input',calc);document.getElementById('commission').addEventListener('input',calc);
+async function logout(){await sb.auth.signOut();location.reload();}
+window.login=login;window.logout=logout;window.resolveReport=resolveReport;window.moderate=moderate;window.verify=verify;window.setActive=setActive;
+sb?.auth.onAuthStateChange((_e,session)=>{if(session)boot()});
+if(sb)sb.auth.getSession().then(({data:{session}})=>{if(session)boot()});
 </script>
 </body></html>
