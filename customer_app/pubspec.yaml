@@ -1,7 +1,7 @@
 name: maher_customer
 description: MAHER customer app
 publish_to: "none"
-version: 0.3.0+3
+version: 1.0.0+1
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
