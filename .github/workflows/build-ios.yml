@@ -48,3 +48,29 @@ jobs:
           flutter build ios --release --no-codesign \
             --dart-define=SUPABASE_URL=${{ env.MAHER_SUPABASE_URL }} \
             --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.MAHER_SUPABASE_PUBLISHABLE_KEY }}
+
+      - name: Package customer iOS app
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent \
+            customer_app/build/ios/iphoneos/Runner.app \
+            MAHER-Customer-iOS.app.zip
+
+      - name: Package professional iOS app
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent \
+            professional_app/build/ios/iphoneos/Runner.app \
+            MAHER-Professional-iOS.app.zip
+
+      - name: Upload customer iOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MAHER-Customer-iOS
+          path: MAHER-Customer-iOS.app.zip
+          if-no-files-found: error
+
+      - name: Upload professional iOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MAHER-Professional-iOS
+          path: MAHER-Professional-iOS.app.zip
+          if-no-files-found: error
