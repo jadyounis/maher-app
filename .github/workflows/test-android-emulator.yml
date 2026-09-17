@@ -1,0 +1,99 @@
+name: Test MAHER Apps on Android Emulator
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+env:
+  MAHER_SUPABASE_URL: https://oqvcmzqhngzpqipgynby.supabase.co
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.0'
+          channel: stable
+          cache: true
+
+      - name: Generate Android projects
+        run: |
+          flutter create --platforms=android --project-name maher_customer customer_app
+          flutter create --platforms=android --project-name maher_professional professional_app
+
+      - name: Build customer APK
+        working-directory: customer_app
+        run: |
+          flutter pub get
+          flutter build apk --release \
+            --dart-define=SUPABASE_URL=${{ env.MAHER_SUPABASE_URL }} \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.MAHER_SUPABASE_PUBLISHABLE_KEY }}
+
+      - name: Build professional APK
+        working-directory: professional_app
+        run: |
+          flutter pub get
+          flutter build apk --release \
+            --dart-define=SUPABASE_URL=${{ env.MAHER_SUPABASE_URL }} \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.MAHER_SUPABASE_PUBLISHABLE_KEY }}
+
+      - name: Start Android emulator and smoke-test both apps
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          force-avd-creation: true
+          emulator-options: -no-window -no-audio -no-boot-anim
+          disable-animations: true
+          script: |
+            set -euo pipefail
+            AAPT="$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort | tail -1)"
+
+            CUSTOMER_APK="$GITHUB_WORKSPACE/customer_app/build/app/outputs/flutter-apk/app-release.apk"
+            PROFESSIONAL_APK="$GITHUB_WORKSPACE/professional_app/build/app/outputs/flutter-apk/app-release.apk"
+
+            CUSTOMER_PACKAGE="$("$AAPT" dump badging "$CUSTOMER_APK" | sed -n "s/^package: name='\([^']*\)'.*/\1/p")"
+            PROFESSIONAL_PACKAGE="$("$AAPT" dump badging "$PROFESSIONAL_APK" | sed -n "s/^package: name='\([^']*\)'.*/\1/p")"
+
+            echo "Customer package: $CUSTOMER_PACKAGE"
+            echo "Professional package: $PROFESSIONAL_PACKAGE"
+
+            adb install -r "$CUSTOMER_APK"
+            adb install -r "$PROFESSIONAL_APK"
+
+            adb shell pm clear "$CUSTOMER_PACKAGE" || true
+            adb shell monkey -p "$CUSTOMER_PACKAGE" 1
+            sleep 6
+            adb shell pidof "$CUSTOMER_PACKAGE"
+            adb exec-out screencap -p > "$GITHUB_WORKSPACE/customer.png"
+
+            adb shell am force-stop "$CUSTOMER_PACKAGE"
+            adb shell pm clear "$PROFESSIONAL_PACKAGE" || true
+            adb shell monkey -p "$PROFESSIONAL_PACKAGE" 1
+            sleep 6
+            adb shell pidof "$PROFESSIONAL_PACKAGE"
+            adb exec-out screencap -p > "$GITHUB_WORKSPACE/professional.png"
+
+            adb logcat -d -t 400 > "$GITHUB_WORKSPACE/logcat.txt"
+            if grep -E "FATAL EXCEPTION|AndroidRuntime" "$GITHUB_WORKSPACE/logcat.txt"; then
+              echo "Crash signature detected in logcat"
+              exit 1
+            fi
+
+      - name: Upload emulator screenshots and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MAHER-Android-Emulator-Smoke-Test
+          path: |
+            customer.png
+            professional.png
+            logcat.txt
