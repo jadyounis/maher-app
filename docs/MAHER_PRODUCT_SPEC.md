@@ -1,4 +1,4 @@
-# MAHER — Product Specification v0.2
+# MAHER — Product Specification v0.3
 
 ## 1. Product
 MAHER is a two-sided marketplace connecting customers who need a service with verified skilled professionals (الصنايعية).
@@ -9,23 +9,29 @@ MAHER is a two-sided marketplace connecting customers who need a service with ve
 - **Admin Dashboard:** manages accounts, verification, categories, requests, jobs, commissions, reviews, disputes and support.
 
 ## 3. Authentication
-Both apps use the same identity model:
-1. Phone/email entry.
-2. OTP verification.
+Both apps use the same Supabase Auth identity model:
+1. Phone entry.
+2. SMS OTP verification.
 3. Account details.
 4. Role-specific onboarding.
+
+Professional accounts are activated/promoted by administration; a client cannot self-assign the professional role.
 
 Professional onboarding additionally includes identity verification, skills, service areas and portfolio.
 
 ## 4. Service pricing modes
 ### Hourly — بالساعة
-Customer pays an hourly rate. The platform commission is calculated per paid hour. The initial business example discussed is **10 JOD/hour**, with **5 JOD** allocated as the professional's hourly amount and the remainder configurable as platform/service economics. Exact commission must be configurable by admin before launch.
+Customer pays an hourly amount. By default, MAHER takes **30% of the customer's gross payment** as platform commission and the professional receives **70%** before any separately configured adjustments.
+
+Example: customer pays **10 JOD/hour** → MAHER commission **3 JOD** → professional amount **7 JOD**.
+
+The commission rate is configurable by Admin.
 
 ### Daily — يومي
-A full-day job uses a daily price. The initial example is **50 JOD/day**. The final price remains configurable per request and professional offer.
+A full-day job uses a daily price. The initial example is **50 JOD/day**. The final price remains configurable per request and professional offer, and the same configurable commission framework applies at settlement.
 
 ### Contract — مقاولة
-Customer publishes the job. Professionals submit their own quotations, for example 20, 25, 35 or 40 JOD. Customer compares the offers and accepts one. The accepted quotation becomes the agreed job price.
+Customer publishes the job. Professionals submit their own quotations, for example 20, 25, 35 or 40 JOD. Customer compares the offers and accepts one. The accepted quotation becomes the agreed job price, and the configured commission applies to the gross settled amount.
 
 ## 5. Customer journey
 Login → OTP → Home → Select service → Select pricing mode → Add description/media → Location → Date/time → Publish → Receive offers → Compare profile/rating/portfolio/price → Accept offer → Scheduled → Professional arrives → Arrival confirmation → Work in progress → Completed → Payment → Review.
@@ -60,33 +66,21 @@ Match by service category + location + service area + availability + skills. Ran
 - SupportTicket
 
 ## 11. Business rules
-- Only verified professionals should be eligible for jobs requiring verification.
+- Only verified/active professionals should be eligible for jobs requiring verification.
 - A customer can accept one offer per request.
 - Once an offer is accepted, competing offers become closed.
 - Arrival and completion are timestamped status events.
 - Hourly jobs need start/end or billable-hour confirmation before final settlement.
 - Contract jobs use the accepted quotation as the agreed amount.
 - Commission rates and pricing defaults are admin-configurable.
+- Admin moderation actions require an explicit action type and reason, and may include expiry or amount.
 
 ## 12. Technical phases
 ### Phase A — UX/MVP
-Two standalone Flutter APKs with the complete navigation and state flow.
+Two Flutter Android apps with complete navigation and state flow. **Completed.**
 
 ### Phase B — Real connection
-Shared backend/API + database + authentication + file storage + push notifications. Both apps read/write the same request, offer and job records.
+Shared Supabase backend/database, authentication scaffolding, secured RPCs, RLS, request/offer/job operations and Realtime subscriptions. **In progress.**
 
 ### Phase C — Production services
-Maps/location, real payment provider, identity verification, chat/call, dispute workflow, admin dashboard, analytics, security rules and production monitoring.
-
-## 13. Current repository structure
-```text
-maher-app/
-├── customer_app/       # Customer mobile application
-├── professional_app/   # Professional mobile application
-├── docs/               # Product and technical specification
-├── lib/                # Previous single-app prototype kept for reference
-└── .github/workflows/  # Automated APK builds
-```
-
-## 14. Visual system
-Deep Navy `#111827`, Electric Orange `#F97316`, Off White `#F8FAFC`. Modern, premium, human and trustworthy. Arabic RTL is the default experience.
+Maps/location, real payment provider, identity verification, chat/call, dispute workflow, admin dashboard, analytics, production secrets/configuration, monitoring, app-store release and end-to-end QA.
