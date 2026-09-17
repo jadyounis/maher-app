@@ -1,4 +1,4 @@
-name: Build MAHER APK
+name: Build MAHER Apps
 
 on:
   workflow_dispatch:
@@ -16,14 +16,28 @@ jobs:
         with:
           flutter-version: '3.35.0'
           channel: stable
-      - name: Generate Android project
-        run: flutter create --platforms=android .
-      - name: Flutter pub get
-        run: flutter pub get
-      - name: Build APK
-        run: flutter build apk --release
-      - name: Upload APK
+          cache: true
+      - name: Generate Android projects
+        run: |
+          flutter create --platforms=android --project-name maher_customer customer_app
+          flutter create --platforms=android --project-name maher_professional professional_app
+      - name: Build customer APK
+        working-directory: customer_app
+        run: |
+          flutter pub get
+          flutter build apk --release
+      - name: Build professional APK
+        working-directory: professional_app
+        run: |
+          flutter pub get
+          flutter build apk --release
+      - name: Upload customer APK
         uses: actions/upload-artifact@v4
         with:
-          name: maher-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: MAHER-Customer-APK
+          path: customer_app/build/app/outputs/flutter-apk/app-release.apk
+      - name: Upload professional APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: MAHER-Professional-APK
+          path: professional_app/build/app/outputs/flutter-apk/app-release.apk
