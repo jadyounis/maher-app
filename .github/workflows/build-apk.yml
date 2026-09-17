@@ -16,6 +16,8 @@ jobs:
         with:
           flutter-version: '3.35.0'
           channel: stable
+      - name: Generate Android project
+        run: flutter create --platforms=android .
       - name: Flutter pub get
         run: flutter pub get
       - name: Build APK
