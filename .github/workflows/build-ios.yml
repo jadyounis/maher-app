@@ -1,0 +1,50 @@
+name: Build MAHER iOS Apps
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+env:
+  MAHER_SUPABASE_URL: https://oqvcmzqhngzpqipgynby.supabase.co
+
+jobs:
+  build-ios:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.0'
+          channel: stable
+          cache: true
+
+      - name: Generate iOS projects
+        run: |
+          flutter create --platforms=ios --project-name maher_customer customer_app
+          flutter create --platforms=ios --project-name maher_professional professional_app
+
+      - name: Install customer dependencies
+        working-directory: customer_app
+        run: flutter pub get
+
+      - name: Install professional dependencies
+        working-directory: professional_app
+        run: flutter pub get
+
+      - name: Build customer iOS (no codesign)
+        working-directory: customer_app
+        run: |
+          flutter build ios --release --no-codesign \
+            --dart-define=SUPABASE_URL=${{ env.MAHER_SUPABASE_URL }} \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.MAHER_SUPABASE_PUBLISHABLE_KEY }}
+
+      - name: Build professional iOS (no codesign)
+        working-directory: professional_app
+        run: |
+          flutter build ios --release --no-codesign \
+            --dart-define=SUPABASE_URL=${{ env.MAHER_SUPABASE_URL }} \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.MAHER_SUPABASE_PUBLISHABLE_KEY }}
