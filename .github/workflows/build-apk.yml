@@ -5,6 +5,9 @@ on:
   push:
     branches: [ main ]
 
+env:
+  MAHER_SUPABASE_URL: https://oqvcmzqhngzpqipgynby.supabase.co
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,12 +28,16 @@ jobs:
         working-directory: customer_app
         run: |
           flutter pub get
-          flutter build apk --release
+          flutter build apk --release \
+            --dart-define=SUPABASE_URL=${{ env.MAHER_SUPABASE_URL }} \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.MAHER_SUPABASE_PUBLISHABLE_KEY }}
       - name: Build professional APK
         working-directory: professional_app
         run: |
           flutter pub get
-          flutter build apk --release
+          flutter build apk --release \
+            --dart-define=SUPABASE_URL=${{ env.MAHER_SUPABASE_URL }} \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.MAHER_SUPABASE_PUBLISHABLE_KEY }}
       - name: Upload customer APK
         uses: actions/upload-artifact@v4
         with:
