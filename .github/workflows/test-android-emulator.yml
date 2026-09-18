@@ -85,7 +85,7 @@ jobs:
           disable-animations: true
           disable-linux-hw-accel: false
           script: |
-            set -euo pipefail
+            set -eu
 
             AAPT="$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort | tail -1)"
             CUSTOMER_APK="$GITHUB_WORKSPACE/customer_app/build/app/outputs/flutter-apk/app-release.apk"
