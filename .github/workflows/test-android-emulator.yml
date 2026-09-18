@@ -41,6 +41,22 @@ jobs:
           flutter create --platforms=android --project-name maher_customer customer_app
           flutter create --platforms=android --project-name maher_professional professional_app
 
+          python3 - <<'PY'
+          from pathlib import Path
+
+          for app in ("customer_app", "professional_app"):
+              manifest = Path(app) / "android/app/src/main/AndroidManifest.xml"
+              text = manifest.read_text()
+              permission = '    <uses-permission android:name="android.permission.INTERNET"/>'
+              if "android.permission.INTERNET" not in text:
+                  text = text.replace(
+                      '<manifest xmlns:android="http://schemas.android.com/apk/res/android">',
+                      '<manifest xmlns:android="http://schemas.android.com/apk/res/android">\n' + permission,
+                  )
+                  manifest.write_text(text)
+              print(f"Internet permission verified: {manifest}")
+          PY
+
       - name: Build customer APK
         working-directory: customer_app
         run: |
