@@ -87,13 +87,14 @@ jobs:
           script: |
             set -eu
 
-            AAPT="$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort | tail -1)"
+            AAPT2="$(find "$ANDROID_HOME/build-tools" -name aapt2 -type f | sort | tail -1)"
             CUSTOMER_APK="$GITHUB_WORKSPACE/customer_app/build/app/outputs/flutter-apk/app-release.apk"
             PROFESSIONAL_APK="$GITHUB_WORKSPACE/professional_app/build/app/outputs/flutter-apk/app-release.apk"
 
-            CUSTOMER_PACKAGE="$("$AAPT" dump badging "$CUSTOMER_APK" | sed -n "s/^package: name='\([^']*\)'.*/\1/p")"
-            PROFESSIONAL_PACKAGE="$("$AAPT" dump badging "$PROFESSIONAL_APK" | sed -n "s/^package: name='\([^']*\)'.*/\1/p")"
+            CUSTOMER_PACKAGE="$("$AAPT2" dump badging "$CUSTOMER_APK" | sed -n "s/^package: name='\([^']*\)'.*/\1/p")"
+            PROFESSIONAL_PACKAGE="$("$AAPT2" dump badging "$PROFESSIONAL_APK" | sed -n "s/^package: name='\([^']*\)'.*/\1/p")"
 
+            echo "AAPT2: $AAPT2"
             echo "Customer package: $CUSTOMER_PACKAGE"
             echo "Professional package: $PROFESSIONAL_PACKAGE"
 
