@@ -2,8 +2,6 @@ name: Build MAHER iOS Apps
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
 
 env:
   MAHER_SUPABASE_URL: https://oqvcmzqhngzpqipgynby.supabase.co
