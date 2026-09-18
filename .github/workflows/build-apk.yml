@@ -14,35 +14,53 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.35.0'
           channel: stable
           cache: true
+
       - name: Generate Android projects
         run: |
           flutter create --platforms=android --project-name maher_customer customer_app
           flutter create --platforms=android --project-name maher_professional professional_app
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          for app in ("customer_app", "professional_app"):
+              manifest = Path(app) / "android/app/src/main/AndroidManifest.xml"
+              text = manifest.read_text()
+              permission = '    <uses-permission android:name="android.permission.INTERNET"/>'
+              if "android.permission.INTERNET" not in text:
+                  text = text.replace(
+                      '<manifest xmlns:android="http://schemas.android.com/apk/res/android">',
+                      '<manifest xmlns:android="http://schemas.android.com/apk/res/android">\n' + permission,
+                  )
+                  manifest.write_text(text)
+              print(f"Internet permission verified: {manifest}")
+          PY
+
       - name: Build customer APK
         working-directory: customer_app
         run: |
           flutter pub get
-          flutter build apk --release \
-            --dart-define=SUPABASE_URL=${{ env.MAHER_SUPABASE_URL }} \
-            --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.MAHER_SUPABASE_PUBLISHABLE_KEY }}
+          flutter build apk --release             --dart-define=SUPABASE_URL=${{ env.MAHER_SUPABASE_URL }}             --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.MAHER_SUPABASE_PUBLISHABLE_KEY }}
+
       - name: Build professional APK
         working-directory: professional_app
         run: |
           flutter pub get
-          flutter build apk --release \
-            --dart-define=SUPABASE_URL=${{ env.MAHER_SUPABASE_URL }} \
-            --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.MAHER_SUPABASE_PUBLISHABLE_KEY }}
+          flutter build apk --release             --dart-define=SUPABASE_URL=${{ env.MAHER_SUPABASE_URL }}             --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.MAHER_SUPABASE_PUBLISHABLE_KEY }}
+
       - name: Upload customer APK
         uses: actions/upload-artifact@v4
         with:
           name: MAHER-Customer-APK
           path: customer_app/build/app/outputs/flutter-apk/app-release.apk
+
       - name: Upload professional APK
         uses: actions/upload-artifact@v4
         with:
